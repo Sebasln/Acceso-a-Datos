@@ -8,6 +8,7 @@ public class Main {
 		
 		//añadiendo archivos
 		Scanner sc = new Scanner(System.in);
+		System.out.println();
 	}
 
 }
