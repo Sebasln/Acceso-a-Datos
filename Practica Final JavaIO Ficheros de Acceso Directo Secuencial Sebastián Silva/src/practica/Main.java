@@ -8,7 +8,11 @@ public class Main {
 		
 		//añadiendo archivos
 		Scanner sc = new Scanner(System.in);
-		System.out.println();
+		int option = sc.nextInt();
+		
+		System.out.println(option);
+		
+		sc.close();
 	}
 
 }
