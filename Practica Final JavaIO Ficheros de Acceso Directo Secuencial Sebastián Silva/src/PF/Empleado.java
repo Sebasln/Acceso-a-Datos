@@ -1,4 +1,4 @@
-package practica;
+package PF;
 
 import java.io.Serializable;
 

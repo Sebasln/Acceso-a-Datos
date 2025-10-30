@@ -1,4 +1,4 @@
-package practica;
+package PF;
 
 public class Planta {
 	private int codigo,stock;
