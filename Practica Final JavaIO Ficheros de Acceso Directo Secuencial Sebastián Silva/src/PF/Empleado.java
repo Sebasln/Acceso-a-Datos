@@ -2,6 +2,7 @@ package PF;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Empleado implements Serializable{
 	private int identificacion;
 	private String nombre, password, cargo;
