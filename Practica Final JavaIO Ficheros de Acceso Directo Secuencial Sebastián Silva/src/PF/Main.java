@@ -17,6 +17,8 @@ import org.w3c.dom.NodeList;
 import java.io.RandomAccessFile;
 import java.time.LocalDate;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 public class Main {
 
@@ -44,8 +46,7 @@ public class Main {
 
 		do {
 
-			System.out.print("\tIntroduce tu ID: ");
-			int id = sc.nextInt();
+			int id = revisarInt(sc, "\tIntroduce tu ID: ");
 			System.out.print("\tIntroduce tu contraseña: ");
 			String pass = sc.next();
 
@@ -155,8 +156,9 @@ public class Main {
 
 			System.out.println("\n\t1 para mostrar el catálogo");
 			System.out.println("\t2 para realizar una venta");
-			System.out.println("\t3 para cerrar sesión");
-			
+			System.out.println("\t3 para realizar una devolución");
+			System.out.println("\t4 para cerrar sesión");
+
 			opcion = revisarInt(sc, "Elige una opción: ");
 			switch (opcion) {
 			case 1:
@@ -166,12 +168,15 @@ public class Main {
 				realizarVenta(sc, eLogeado);
 				break;
 			case 3:
-				System.out.println("en proceso");
+				realizarDevolucion(sc);
+				break;
+			case 4:
+				System.out.println("Saliendo...");
 				break;
 			default:
 				System.err.println("Opción no válida. Inténtalo de nuevo (1-3).");
 			}
-		} while (opcion != 3);
+		} while (opcion != 4);
 	}
 
 	public static void mostrarCatalogo() {
@@ -266,29 +271,27 @@ public class Main {
 
 		int ticketNum = obtenerSiguienteNumeroTicket();
 
-        revisarCarpeta("TICKETS");
-        String nombreFichero = "TICKETS/" + ticketNum + ".txt";
-        
-        try (FileWriter fw = new FileWriter(nombreFichero);
-                PrintWriter pw = new PrintWriter(fw)) {
-               
-               pw.println("Número Ticket: " + ticketNum);
-               pw.println();
-               pw.println("Empleado que ha atendido: " + empleado.getIdentificacion());
-               pw.println("Nombre del empleado: " + empleado.getNombre());
-               pw.println("Fecha de venta: " + LocalDate.now());
-               pw.println();
-               pw.println("Producto\tCant.\tPrecio Ud.\tTotal");
-               pw.printf("%s (Cód:%d)\t%d\t%.2f€\t\t%.2f€\n", 
-                         nomProd, codProd, cantidad, precioUd, total);
-               pw.println();
-               pw.println("TOTAL A PAGAR: " + String.format("%.2f €", total));
-               
-               System.out.println("Ticket " + ticketNum + ".txt generado con éxito.");
-               
-           } catch (IOException e) {
-               System.err.println("Error al generar el ticket: " + e.getMessage());
-           }
+		revisarCarpeta("TICKETS");
+		String nombreFichero = "TICKETS/" + ticketNum + ".txt";
+
+		try (FileWriter fw = new FileWriter(nombreFichero); PrintWriter pw = new PrintWriter(fw)) {
+
+			pw.println("Número Ticket: " + ticketNum);
+			pw.println();
+			pw.println("Empleado que ha atendido: " + empleado.getIdentificacion());
+			pw.println("Nombre del empleado: " + empleado.getNombre());
+			pw.println("Fecha de venta: " + LocalDate.now());
+			pw.println();
+			pw.println("Producto\tCant.\tPrecio Ud.\tTotal");
+			pw.printf("%s (Cód:%d)\t%d\t%.2f€\t\t%.2f€\n", nomProd, codProd, cantidad, precioUd, total);
+			pw.println();
+			pw.println("TOTAL A PAGAR: " + String.format("%.2f €", total));
+
+			System.out.println("Ticket " + ticketNum + ".txt generado con éxito.");
+
+		} catch (IOException e) {
+			System.err.println("Error al generar el ticket: " + e.getMessage());
+		}
 	}
 
 	public static int revisarInt(Scanner sc, String mensaje) {
@@ -307,16 +310,115 @@ public class Main {
 
 	public static int obtenerSiguienteNumeroTicket() {
 		revisarCarpeta("TICKETS");
-		File carpeta = new File("TICKETS");
+		revisarCarpeta("DEVOLUCIONES");
+
+		int maxTickets = buscarMaxNumEnCarpeta("TICKETS");
+		int maxDevoluciones = buscarMaxNumEnCarpeta("DEVOLUCIONES");
+
+		int maxGlobal = Math.max(maxTickets, maxDevoluciones);
+
+		return maxGlobal + 1;
+	}
+
+	public static void realizarDevolucion(Scanner sc) {
+		System.out.println("\n--- Procesar Devolución ---");
+
+		int numTicket = revisarInt(sc, "Introduce el número de ticket a devolver: ");
+
+		String nombreFicheroOriginal = "TICKETS/" + numTicket + ".txt";
+		String nombreFicheroDevuelto = "DEVOLUCIONES/" + numTicket + ".txt";
+
+		File ficheroTicketOriginal = new File(nombreFicheroOriginal);
+		File ficheroTicketDevuelto = new File(nombreFicheroDevuelto);
+
+		if (!ficheroTicketOriginal.exists()) {
+			System.err.println("Error: El ticket " + numTicket + ".txt no existe en la carpeta TICKETS.");
+			return;
+		}
+
+		if (ficheroTicketDevuelto.exists()) {
+			System.err.println("Error: El ticket " + numTicket + ".txt ya fue procesado como una devolución.");
+			return;
+		}
+
+		System.out.println("Ticket " + numTicket + ".txt encontrado. Procesando...");
+
+		int codigoPlanta = -1;
+		int cantidadDevolver = -1;
+		ArrayList<String> contenidoTicket = new ArrayList<>();
+
+		try {
+			try (FileReader fr = new FileReader(ficheroTicketOriginal); BufferedReader br = new BufferedReader(fr)) {
+
+				String linea;
+				while ((linea = br.readLine()) != null) {
+					contenidoTicket.add(linea);
+					if (linea.contains("(Cód:")) {
+						int iniCodigo = linea.indexOf("(Cód:") + 5;
+						int finCodigo = linea.indexOf(")", iniCodigo);
+						codigoPlanta = Integer.parseInt(linea.substring(iniCodigo, finCodigo));
+
+						int iniCant = linea.indexOf("\t", finCodigo) + 1;
+						int finCant = linea.indexOf("\t", iniCant);
+						cantidadDevolver = Integer.parseInt(linea.substring(iniCant, finCant).trim());
+					}
+				}
+			}
+
+			if (codigoPlanta == -1 || cantidadDevolver == -1) {
+				System.err.println("Error: El formato del ticket " + numTicket + ".txt es incorrecto.");
+				return;
+			}
+
+			try (RandomAccessFile raf = new RandomAccessFile("resources/plantas.dat", "rw")) {
+				long posicion = (long) (codigoPlanta - 1) * 12;
+				raf.seek(posicion + 8);
+
+				int stockActual = raf.readInt();
+				int nuevoStock = stockActual + cantidadDevolver;
+
+				raf.seek(posicion + 8);
+				raf.writeInt(nuevoStock);
+			}
+
+			revisarCarpeta("DEVOLUCIONES");
+
+			try (FileWriter fw = new FileWriter(ficheroTicketDevuelto); PrintWriter pw = new PrintWriter(fw)) {
+				for (String linea : contenidoTicket) {
+					pw.println(linea);
+				}
+				pw.println("---------------------------------");
+				pw.println("--- TICKET DEVUELTO ---");
+				pw.println("--- STOCK RESTAURADO ---");
+			}
+
+			ficheroTicketOriginal.delete();
+
+			System.out.println("¡Devolución completada!");
+			System.out.printf("Se han devuelto %d unidades de la planta Cód:%d al stock.\n", cantidadDevolver,
+					codigoPlanta);
+			System.out.println("Ticket " + numTicket + ".txt movido a DEVOLUCIONES.");
+
+		} catch (IOException e) {
+			System.err.println("Error de E/S al procesar la devolución: " + e.getMessage());
+		} catch (NumberFormatException e) {
+			System.err.println("Error: No se pudo 'parsear' el contenido del ticket. Formato corrupto.");
+		}
+	}
+
+	private static int buscarMaxNumEnCarpeta(String nombreCarpeta) {
+		File carpeta = new File(nombreCarpeta);
+
+		if (!carpeta.exists()) {
+			return 0;
+		}
 
 		File[] ficheros = carpeta.listFiles();
-
 		int maxNum = 0;
 
 		if (ficheros != null) {
 			for (File f : ficheros) {
 				String nombre = f.getName();
-
 				if (nombre.endsWith(".txt")) {
 					try {
 						String numStr = nombre.substring(0, nombre.lastIndexOf('.'));
@@ -329,8 +431,6 @@ public class Main {
 				}
 			}
 		}
-
-		return maxNum + 1;
+		return maxNum;
 	}
-
 }

@@ -9,11 +9,8 @@ public class GeneradorPlantasDAT {
 		try (RandomAccessFile raf = new RandomAccessFile("resources/plantas.dat", "rw")) {
 
 			for (int i = 0; i < 20; i++) {
-
 				int codigo = i + 1; 
-
 				float precio = 5.0f + (i * 2.5f);
-
 				int stock = 50 + (i * 5); 
 
 				raf.writeInt(codigo);
