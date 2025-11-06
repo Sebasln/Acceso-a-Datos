@@ -149,14 +149,15 @@ public class Main {
 
 	public static void menuVendedor(Scanner sc, Empleado eLogeado) {
 		System.out.println("\nMenú de vendedor");
-		int opcion = revisarInt(sc, "Elige una opción");
 
+		int opcion;
 		do {
 
-			System.out.println("\t1 para mostrar el catálogo");
+			System.out.println("\n\t1 para mostrar el catálogo");
 			System.out.println("\t2 para realizar una venta");
 			System.out.println("\t3 para cerrar sesión");
-
+			
+			opcion = revisarInt(sc, "Elige una opción: ");
 			switch (opcion) {
 			case 1:
 				mostrarCatalogo();
@@ -165,7 +166,7 @@ public class Main {
 				realizarVenta(sc, eLogeado);
 				break;
 			case 3:
-				System.out.println("Cerrando sesión... ¡Hasta pronto!");
+				System.out.println("en proceso");
 				break;
 			default:
 				System.err.println("Opción no válida. Inténtalo de nuevo (1-3).");
