@@ -328,7 +328,7 @@ public class Main {
 				darAltaEmpleado(sc);
 				break;
 			case 5:
-				darBajaEmpleado(sc);
+				darBajaEmpleado(sc, eLogeado);
 				break;
 			case 6:
 				rescatarEmpleado(sc);
@@ -514,9 +514,24 @@ public class Main {
 
 	}
 
-	public static void darBajaEmpleado(Scanner sc) {
+	public static void darBajaEmpleado(Scanner sc, Empleado eLogeado) {
 		System.out.println("\nDar de baja a un empleado");
 
+		System.out.println("Empleados activos:");
+        int empleadosDisponibles = 0;
+        for (Empleado emp : listaEmpleados) {
+            if (emp.getIdentificacion() == eLogeado.getIdentificacion()) {
+                continue;
+            }
+            System.out.printf("\tID: %04d - Nombre: %s\n", emp.getIdentificacion(), emp.getNombre());
+            empleadosDisponibles++;
+        }
+
+        if (empleadosDisponibles == 0) {
+            System.out.println("No hay otros empleados en el sistema para dar de baja.");
+            return;
+        }
+		
 		int idBaja = validarInt(sc, "Introduce el id del empleado a dar de baja: ");
 
 		Empleado empleadoADespedir = null;
@@ -949,7 +964,7 @@ public class Main {
 			raf.writeFloat(precio);
 
 		} catch (IOException e) {
-			System.err.println("Error al escribir en plantasBaja.dat.");
+			System.err.println("Error al escribir en 'plantasBaja.dat'.");
 		}
 	}
 
@@ -993,7 +1008,7 @@ public class Main {
 				float valor = sc.nextFloat();
 				return valor;
 			} catch (InputMismatchException e) {
-				System.err.println("Error: Debes introducir un NÚMERO decimal (ej: 12,5).");
+				System.err.println("Error: Debes introducir un número decimal (ej: 12,5).");
 				sc.next();
 			}
 		}
