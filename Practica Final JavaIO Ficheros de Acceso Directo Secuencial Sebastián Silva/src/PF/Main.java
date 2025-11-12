@@ -257,9 +257,9 @@ public class Main {
 			System.out.println("Ticket " + numTicket + ".txt movido a DEVOLUCIONES.");
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println("Error de E/S al mover el ticket.");
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
+			System.out.println("Error de formato de número.");
 		}
 	}
 
@@ -280,7 +280,7 @@ public class Main {
 			ficheroAImprimir = ficheroDevuelto;
 			System.out.println("Ticket encontrado en DEVOLUCIONES/.");
 		} else {
-			System.err.println("Error: No se ha encontrado ningún ticket con el número " + numTicket);
+			System.err.println("No se ha encontrado ningún ticket con el número " + numTicket);
 			return;
 		}
 
@@ -371,10 +371,8 @@ public class Main {
 		System.out.println("Planta añadida a la lista.");
 
 		escribirPlantaEnDat(nuevaPlanta);
-
 		escribirPlantasXML();
 
-		System.out.println("\nPlanta dada de alta en ambos ficheros.");
 		System.out.println(nuevaPlanta.toString());
 	}
 
@@ -396,7 +394,7 @@ public class Main {
 			int stockOriginal = raf.readInt();
 
 			if (precioOriginal == 0.0f && stockOriginal == 0) {
-				System.err.println("La planta " + codigo + " ya estaba dada de baja.");
+				System.err.println("La planta con código " + codigo + " ya estaba dada de baja.");
 				return;
 			}
 
@@ -476,7 +474,7 @@ public class Main {
 
 			for (Empleado emp : listaEmpleados) {
 				if (emp.getIdentificacion() == id) {
-					System.err.println("Error: ¡El ID " + id + " ya pertenece a " + emp.getNombre() + "!");
+					System.err.println("El ID " + id + " ya pertenece a " + emp.getNombre());
 					idRepetido = true;
 					break;
 				}
@@ -485,7 +483,7 @@ public class Main {
 			if (!idRepetido) {
 				for (Empleado empBaja : cargarEmpleadosDeBaja()) {
 					if (empBaja.getIdentificacion() == id) {
-						System.err.println("Error: ¡El ID " + id + " ya pertenece a un empleado de baja!");
+						System.err.println("El ID " + id + " ya pertenece a un empleado de baja");
 						idRepetido = true;
 						break;
 					}
@@ -984,7 +982,7 @@ public class Main {
 			if (pass.length() >= 5 && pass.length() <= 7) {
 				return pass;
 			} else {
-				System.err.println("Error: La contraseña debe tener entre 5 y 7 caracteres.");
+				System.err.println("La contraseña debe tener entre 5 y 7 caracteres.");
 			}
 		}
 	}
@@ -996,7 +994,7 @@ public class Main {
 			if (cargo.equals("vendedor") || cargo.equals("gestor")) {
 				return cargo;
 			} else {
-				System.err.println("Error: El cargo solo puede ser 'vendedor' o 'gestor'.");
+				System.err.println("El cargo solo puede ser 'vendedor' o 'gestor'.");
 			}
 		}
 	}
@@ -1008,7 +1006,7 @@ public class Main {
 				float valor = sc.nextFloat();
 				return valor;
 			} catch (InputMismatchException e) {
-				System.err.println("Error: Debes introducir un número decimal (ej: 12,5).");
+				System.err.println("Debes introducir un número decimal (ej: 12,5).");
 				sc.next();
 			}
 		}
@@ -1022,7 +1020,7 @@ public class Main {
 				return valor;
 
 			} catch (InputMismatchException e) {
-				System.err.println("Error. Debes introducir un número entero.");
+				System.err.println("Debes introducir un número entero.");
 				sc.next();
 			}
 		}
@@ -1057,7 +1055,7 @@ public class Main {
 		File plantasDAT = new File("resources/plantas.dat");
 
 		if (!empleados.exists() || !plantasXML.exists() || !plantasDAT.exists()) {
-			System.err.println("Error. Faltan ficheros.");
+			System.err.println("Faltan ficheros.");
 			return;
 		}
 		cargarEmpleados();
